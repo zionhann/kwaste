@@ -39,21 +39,45 @@ function App() {
     return () => controller.abort();
   }, []);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       searchControllerRef.current?.abort();
-    },
-    []
-  );
+    };
+  }, []);
+
+  const cancelActiveSearch = () => {
+    const activeController = searchControllerRef.current;
+    if (!activeController) return;
+
+    searchControllerRef.current = null;
+    activeController.abort();
+    setLoading(false);
+  };
 
   const handleSidoChange = (value: string) => {
+    cancelActiveSearch();
+    setSearchError("");
     setSido(value);
     setSigungu("");
+  };
+
+  const handleSigunguChange = (value: string) => {
+    cancelActiveSearch();
+    setSearchError("");
+    setSigungu(value);
+  };
+
+  const handleQueryChange = (value: string) => {
+    cancelActiveSearch();
+    setSearchError("");
+    setQuery(value);
   };
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     const trimmedQuery = query.trim();
+
+    cancelActiveSearch();
 
     if (!trimmedQuery) {
       setResults([]);
@@ -61,7 +85,6 @@ function App() {
       return;
     }
 
-    searchControllerRef.current?.abort();
     const controller = new AbortController();
     searchControllerRef.current = controller;
 
@@ -126,7 +149,7 @@ function App() {
             <select
               id={sigunguId}
               value={sigungu}
-              onChange={(e) => setSigungu(e.target.value)}
+              onChange={(e) => handleSigunguChange(e.target.value)}
               className="select"
               disabled={!sido}
             >
@@ -149,7 +172,7 @@ function App() {
               id={queryId}
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="예: 티비, 소파, 냉장고"
               className="search-input"
               aria-describedby={searchHintId}
