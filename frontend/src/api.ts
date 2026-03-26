@@ -2,8 +2,10 @@ import type { LocationsResponse, SearchResponse } from "./types";
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
 
-export async function fetchLocations(): Promise<LocationsResponse> {
-  const res = await fetch(`${API_BASE}/api/locations`);
+export async function fetchLocations(
+  signal?: AbortSignal
+): Promise<LocationsResponse> {
+  const res = await fetch(`${API_BASE}/api/locations`, { signal });
   if (!res.ok) throw new Error("Failed to fetch locations");
   return res.json();
 }
@@ -11,12 +13,13 @@ export async function fetchLocations(): Promise<LocationsResponse> {
 export async function searchItems(
   query: string,
   sido?: string,
-  sigungu?: string
+  sigungu?: string,
+  signal?: AbortSignal
 ): Promise<SearchResponse> {
   const params = new URLSearchParams({ query });
   if (sido) params.append("sido", sido);
   if (sigungu) params.append("sigungu", sigungu);
-  const res = await fetch(`${API_BASE}/api/search?${params}`);
+  const res = await fetch(`${API_BASE}/api/search?${params}`, { signal });
   if (!res.ok) throw new Error("Search failed");
   return res.json();
 }
